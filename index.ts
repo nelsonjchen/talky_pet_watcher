@@ -10,7 +10,9 @@ let previousIsMotion: boolean | null = null;
 
 (async () => {
   await cam.connect();
+  console.log('Connected to camera');
   cam.on('event', (event: any) => {
+    console.log('Event:', event);
     if (event.message && event.message.data && event.message.data.simpleItem) {
       const isMotionItem = Array.isArray(event.message.data.simpleItem) ? event.message.data.simpleItem.find((item: any) => item.$.Name === 'IsMotion') : event.message.data.simpleItem;
       if (isMotionItem) {
@@ -23,3 +25,4 @@ let previousIsMotion: boolean | null = null;
     }
   });
 })().catch(console.error);
+
