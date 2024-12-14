@@ -9,6 +9,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "onvif": "^0.8.0"
+    "onvif": "^0.8.0",
+    "rtsp-ffmpeg": "^0.0.19",
+    "socket.io": "^4.8.1"
   }
 }
