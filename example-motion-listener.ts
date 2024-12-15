@@ -152,6 +152,54 @@ function stripNamespaces(topic: string): string {
 	return output
 }
 
+function processSource(camMessage: EventMessage): { sourceName: string | null, sourceValue: string | null } {
+	let sourceName: string | null = null;
+	let sourceValue: string | null = null;
+
+	// Check if source and simpleItem exist
+	if (camMessage.message.message.source && camMessage.message.message.source.simpleItem) {
+		// Handle array or single item
+		if (Array.isArray(camMessage.message.message.source.simpleItem)) {
+			sourceName = camMessage.message.message.source.simpleItem[0].$.Name;
+			sourceValue = camMessage.message.message.source.simpleItem[0].$.Value;
+		} else {
+			sourceName = camMessage.message.message.source.simpleItem.$.Name;
+			sourceValue = camMessage.message.message.source.simpleItem.$.Value;
+		}
+	}
+
+	return { sourceName, sourceValue };
+}
+
+function processData(camMessage: EventMessage, eventTime: string, eventTopic: string, eventProperty: string) {
+	// Check if data and simpleItem exist
+	if (camMessage.message.message.data && camMessage.message.message.data.simpleItem) {
+		// Handle array or single item
+		if (Array.isArray(camMessage.message.message.data.simpleItem)) {
+			for (let x = 0; x < camMessage.message.message.data.simpleItem.length; x++) {
+				let dataName: string = camMessage.message.message.data.simpleItem[x].$.Name;
+				let dataValue: string = camMessage.message.message.data.simpleItem[x].$.Value;
+				processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
+			}
+		} else {
+			let dataName: string = camMessage.message.message.data.simpleItem.$.Name;
+			let dataValue: string = camMessage.message.message.data.simpleItem.$.Value;
+			processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
+		}
+	} else if (camMessage.message.message.data && camMessage.message.message.data.elementItem) {
+		// Handle elementItem
+		let dataName: string = 'elementItem';
+		let dataValue: string = JSON.stringify(camMessage.message.message.data.elementItem);
+		processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
+	} else {
+		// Handle no data
+		let dataName: string | null = null;
+		let dataValue: string | null = null;
+		processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
+	}
+}
+
+
 function ReceivedEvent(camMessage: EventMessage, _xml: any) {
     let eventTopic: string = camMessage.topic._
 	eventTopic = stripNamespaces(eventTopic)
@@ -159,38 +207,9 @@ function ReceivedEvent(camMessage: EventMessage, _xml: any) {
     if (eventTopic.includes('Motion')) {
         let eventTime: string = camMessage.message.message.$.UtcTime;
         let eventProperty: string = camMessage.message.message.$.PropertyOperation
-        let sourceName: string | null = null
-        let sourceValue: string | null = null
-        if (camMessage.message.message.source && camMessage.message.message.source.simpleItem) {
-            if (Array.isArray(camMessage.message.message.source.simpleItem)) {
-                sourceName = camMessage.message.message.source.simpleItem[0].$.Name
-                sourceValue = camMessage.message.message.source.simpleItem[0].$.Value
-            } else {
-                sourceName = camMessage.message.message.source.simpleItem.$.Name
-                sourceValue = camMessage.message.message.source.simpleItem.$.Value
-            }
-        }
-        if (camMessage.message.message.data && camMessage.message.message.data.simpleItem) {
-            if (Array.isArray(camMessage.message.message.data.simpleItem)) {
-                for (let x = 0; x < camMessage.message.message.data.simpleItem.length; x++) {
-                    let dataName: string = camMessage.message.message.data.simpleItem[x].$.Name
-                    let dataValue: string = camMessage.message.message.data.simpleItem[x].$.Value
-                    processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
-                }
-            } else {
-                let dataName: string = camMessage.message.message.data.simpleItem.$.Name
-                let dataValue: string = camMessage.message.message.data.simpleItem.$.Value
-                processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
-            }
-        } else if (camMessage.message.message.data && camMessage.message.message.data.elementItem) {
-            let dataName: string = 'elementItem'
-            let dataValue: string = JSON.stringify(camMessage.message.message.data.elementItem)
-            processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
-        } else {
-            let dataName: string | null = null
-            let dataValue: string | null = null
-            processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
-        }
+
+		const { sourceName, sourceValue } = processSource(camMessage);
+		processData(camMessage, eventTime, eventTopic, eventProperty);
     }
 }
 
