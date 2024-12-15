@@ -5,9 +5,6 @@
  *    Tested with Axis (which uses a fixed PullPoint URL with a SubscriberId in the XML)
  *    and with HikVision (which uses a dynamically generated PullPoint URL)
  *
- * 2) Base Subscribe where we start a small HTTP Server on Port 8086, and tell the camera
- *    to send new ONVIF Events to our mini HTTP server.
- *
  * Created by Roger Hardiman <opensource@rjh.org.uk>
  *
  * (c) Roger Hardiman, RJH Technical Consultancy Ltd, November 2019, September 2021
@@ -23,13 +20,8 @@ let HOSTNAME = '192.168.8.21',
 
 const EventMethodTypes = { PULL: "pull", SUBSCRIBE: "subscribe" }
 
-let EVENT_RECEIVER_IP_ADDRESS = '192.168.1.70'; // the IP Address and Port for a HTTP Server that the camera will send events to. Change this.
-let EVENT_RECEIVER_PORT = 8086;
-
 // PICK WHICH EVENT METHOD TOUSE
-// let EVENT_MODE = EventMethodTypes.PULL;     // <- PICK ONE
 let EVENT_MODE = EventMethodTypes.PULL;     // <- PICK ONE
-
 
 
 console.log("*******************************************************************************");
@@ -37,63 +29,12 @@ console.log("** This example can switch between PullPoint and Base Subscribe mod
 if (EVENT_MODE == EventMethodTypes.PULL) {
 	console.log("** The library will poll for events using a WS-Pull Point Subscription");
 }
-if (EVENT_MODE == EventMethodTypes.SUBSCRIBE) {
-	console.log("** The camera will be told to send ONVIF Events to " + EVENT_RECEIVER_IP_ADDRESS + ":" + EVENT_RECEIVER_PORT);
-}
 console.log("*******************************************************************************");
 
 
 let Cam = require('onvif').Cam;
 let cam_obj = null;
 let flow = require('nimble');
-
-let http = require('http');
-let server = null;
-
-if (EVENT_MODE == EventMethodTypes.SUBSCRIBE) {
-	// Create a HTTP Server to receive Events
-	server = http.createServer(function (request, response) {
-		// new HTTP connection received from the ONVIF camera
-		let body = '';
-		request.on('data', chunk => {
-			body += chunk;
-		})
-		request.on('end', () => {
-			//end of data
-			if (request.method == "POST") {
-				console.log('HTTP POST Message received on ' + request.url);
-				//console.log(body);
-				console.log('');
-				response.writeHead(200, { "Content-Type": "text\plain" });
-				response.end("received POST request.");
-
-				// Process the event that has been received
-				if (cam_obj != null) {
-					// parseEventXML requires a callback, because the inner SOAP Parser is async and uses callbacks
-					cam_obj.parseEventXML(body, function(err,data) {
-						if (err) {
-							console.log('Error parsing the XML');
-						} else {
-							ReceivedEvent(data, body);
-						}
-					});
-				}
-				return;
-			}
-			else {
-				console.log('Unexpected connect to HTTP Server to ' + request.url);
-				response.writeHead(200, { "Content-Type": "text\plain" });
-				response.end("Undefined request .");
-				return;
-			}
-		})
-
-	});
-
-	server.listen(EVENT_RECEIVER_PORT);
-	console.log("Server running on port " + EVENT_RECEIVER_PORT);
-}
-
 
 
 new Cam({
@@ -201,22 +142,6 @@ new Cam({
 			}
 		},
 		function (callback) {
-			if (hasEvents && hasTopics && EVENT_MODE == EventMethodTypes.SUBSCRIBE) {
-				let uniqueID = 1001; // would increment this for every cam_obj object. It is used in the HTTP address sent to the LISTEN_PORT
-
-				let receveUrl = "http://" + EVENT_RECEIVER_IP_ADDRESS + ":" + EVENT_RECEIVER_PORT + "/events/" + uniqueID
-				cam_obj.subscribe(
-					{
-						url: receveUrl
-					},
-					(err, subscription, xml) => {
-						console.log('Subscribed to events')
-					}
-				);
-
-				// Events will now be received on the EVENT_RECEIVER HTTP Server
-			}
-
 			if (hasEvents && hasTopics && EVENT_MODE == EventMethodTypes.PULL) {
 
 				// register for 'event' events. This causes the library to ask the camera for Pull Events
@@ -347,4 +272,3 @@ function processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceVa
 	}
 	console.log(output)
 }
-
