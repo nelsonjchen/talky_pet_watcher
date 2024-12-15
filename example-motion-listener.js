@@ -136,34 +136,31 @@ function ReceivedEvent(camMessage, _xml) {
                 for (let x = 0; x < camMessage.message.message.data.simpleItem.length; x++) {
                     let dataName = camMessage.message.message.data.simpleItem[x].$.Name
                     let dataValue = camMessage.message.message.data.simpleItem[x].$.Value
-                    processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceValue, dataName, dataValue)
+                    processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
                 }
             } else {
                 let dataName = camMessage.message.message.data.simpleItem.$.Name
                 let dataValue = camMessage.message.message.data.simpleItem.$.Value
-                processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceValue, dataName, dataValue)
+                processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
             }
         } else if (camMessage.message.message.data && camMessage.message.message.data.elementItem) {
             let dataName = 'elementItem'
             let dataValue = JSON.stringify(camMessage.message.message.data.elementItem)
-            processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceValue, dataName, dataValue)
+            processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
         } else {
             let dataName = null
             let dataValue = null
-            processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceValue, dataName, dataValue)
+            processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue)
         }
     }
 }
 
-function processEvent(eventTime, eventTopic, eventProperty, sourceName, sourceValue, dataName, dataValue) {
+function processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue) {
 	let output = '';
     const now = new Date();
 	output += `EVENT: ${now.toJSON()} ${eventTopic}`
 	if (typeof (eventProperty) !== "undefined") {
 		output += ` PROP:${eventProperty}`
-	}
-	if (typeof (sourceName) !== "undefined" && typeof (sourceValue) !== "undefined") {
-		output += ` SRC:${sourceName}=${sourceValue}`
 	}
 	if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
 		output += ` DATA:${dataName}=${dataValue}`
