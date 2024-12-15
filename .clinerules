@@ -1,0 +1,2 @@
+* This project uses bun, not npm or node.
+* The onvif stuff in npm is still in javascript and types don't seem to be available. OK, that sucks, but just work with it gradually.
