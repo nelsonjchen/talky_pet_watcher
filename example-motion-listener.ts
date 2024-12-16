@@ -3,9 +3,9 @@
 // The script will print out any motion events that are detected by the camera.
 
 let HOSTNAME: string = '192.168.8.21',
-	PORT: number = 2020,
-	USERNAME: string = 'tpuser',
-	PASSWORD: string = 'tppass';
+    PORT: number = 2020,
+    USERNAME: string = 'tpuser',
+    PASSWORD: string = 'tppass';
 
 const EventMethodTypes = { PULL: "pull", SUBSCRIBE: "subscribe" }
 let EVENT_MODE: string = EventMethodTypes.PULL;
@@ -14,42 +14,42 @@ import { Cam } from 'onvif/promises';
 let cam_obj: any = null;
 
 interface DeviceInfo {
-	manufacturer: string;
-	model: string;
-	firmwareVersion: string;
-	serialNumber: string;
+    manufacturer: string;
+    model: string;
+    firmwareVersion: string;
+    serialNumber: string;
 }
 
 interface SimpleItem {
-	$: {
-		Name: string;
-		Value: string;
-	}
+    $: {
+        Name: string;
+        Value: string;
+    }
 }
 
 interface EventMessage {
-	topic: {
-		_: string;
-	};
-	message: {
-		message: {
-			$: {
-				UtcTime: string;
-				PropertyOperation: string;
-			};
-			source?: {
-				simpleItem?: SimpleItem | SimpleItem[];
-			};
-			data?: {
-				simpleItem?: SimpleItem | SimpleItem[];
-				elementItem?: any;
-			}
-		}
-	}
+    topic: {
+        _: string;
+    };
+    message: {
+        message: {
+            $: {
+                UtcTime: string;
+                PropertyOperation: string;
+            };
+            source?: {
+                simpleItem?: SimpleItem | SimpleItem[];
+            };
+            data?: {
+                simpleItem?: SimpleItem | SimpleItem[];
+                elementItem?: any;
+            }
+        }
+    }
 }
 
 interface EventTopic {
-	topicSet: any;
+    topicSet: any;
 }
 
 // MotionEventListener class is responsible for listening to motion events from the camera.
@@ -196,37 +196,37 @@ async function main() {
 
 // Removes namespaces from the topic string.
 function stripNamespaces(topic: string): string {
-	let output: string = '';
-	let parts: string[] = topic.split('/')
-	for (let index = 0; index < parts.length; index++) {
-		let stringNoNamespace: string = parts[index].split(':').pop()
-		if (output.length == 0) {
-			output += stringNoNamespace
-		} else {
-			output += '/' + stringNoNamespace
-		}
-	}
-	return output
+    let output: string = '';
+    let parts: string[] = topic.split('/')
+    for (let index = 0; index < parts.length; index++) {
+        let stringNoNamespace: string = parts[index].split(':').pop()
+        if (output.length == 0) {
+            output += stringNoNamespace
+        } else {
+            output += '/' + stringNoNamespace
+        }
+    }
+    return output
 }
 
 // Processes the source part of the event message.
 function processSource(camMessage: EventMessage): { sourceName: string | null, sourceValue: string | null } {
-	let sourceName: string | null = null;
-	let sourceValue: string | null = null;
+    let sourceName: string | null = null;
+    let sourceValue: string | null = null;
 
-	// Check if source and simpleItem exist
-	if (camMessage.message.message.source && camMessage.message.message.source.simpleItem) {
-		// Handle array or single item
-		if (Array.isArray(camMessage.message.message.source.simpleItem)) {
-			sourceName = camMessage.message.message.source.simpleItem[0].$.Name;
-			sourceValue = camMessage.message.message.source.simpleItem[0].$.Value;
-		} else {
-			sourceName = camMessage.message.message.source.simpleItem.$.Name;
-			sourceValue = camMessage.message.message.source.simpleItem.$.Value;
-		}
-	}
+    // Check if source and simpleItem exist
+    if (camMessage.message.message.source && camMessage.message.message.source.simpleItem) {
+        // Handle array or single item
+        if (Array.isArray(camMessage.message.message.source.simpleItem)) {
+            sourceName = camMessage.message.message.source.simpleItem[0].$.Name;
+            sourceValue = camMessage.message.message.source.simpleItem[0].$.Value;
+        } else {
+            sourceName = camMessage.message.message.source.simpleItem.$.Name;
+            sourceValue = camMessage.message.message.source.simpleItem.$.Value;
+        }
+    }
 
-	return { sourceName, sourceValue };
+    return { sourceName, sourceValue };
 }
 
 main();
