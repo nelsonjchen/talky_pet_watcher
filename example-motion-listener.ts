@@ -6,7 +6,7 @@ let HOSTNAME: string = '192.168.8.21',
 const EventMethodTypes = { PULL: "pull", SUBSCRIBE: "subscribe" }
 let EVENT_MODE: string = EventMethodTypes.PULL;
 
-import { Cam } from 'onvif';
+import { Cam } from 'onvif/promises';
 let cam_obj: any = null;
 
 interface DeviceInfo {
@@ -46,10 +46,6 @@ interface EventMessage {
 
 interface EventTopic {
 	topicSet: any;
-}
-
-interface Capabilities {
-    events?: any;
 }
 
 class MotionEventListener {
@@ -132,65 +128,25 @@ async function main() {
     });
 
     try {
-        await new Promise((resolve, reject) => {
-            cam_obj.connect((err: any) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(undefined);
-                }
-            });
-        });
+        await cam_obj.connect();
 
         console.log('Connected to ONVIF Device');
 
-        const info: DeviceInfo = await new Promise((resolve, reject) => {
-            cam_obj.getDeviceInformation((err: any, info: DeviceInfo) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(info);
-                }
-            });
-        });
+        const info = await cam_obj.getDeviceInformation();
         console.log('Manufacturer  ' + info.manufacturer);
         console.log('Model         ' + info.model);
         console.log('Firmware      ' + info.firmwareVersion);
         console.log('Serial Number ' + info.serialNumber);
 
-        const date = await new Promise((resolve, reject) => {
-            cam_obj.getSystemDateAndTime((err: any, date: any) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(date);
-                }
-            });
-        });
+        const date = await cam_obj.getSystemDateAndTime();
         console.log('Device Time   ' + date);
 
-        const capabilities: Capabilities = await new Promise((resolve, reject) => {
-            cam_obj.getCapabilities((err: any, data: Capabilities) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(data);
-                }
-            });
-        });
+        const capabilities = await cam_obj.getCapabilities();
         let hasEvents: boolean = !!capabilities.events;
 
         let hasTopics: boolean = false;
         if (hasEvents) {
-            const eventTopic: EventTopic = await new Promise((resolve, reject) => {
-                cam_obj.getEventProperties((err: any, data: EventTopic) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(data);
-                    }
-                });
-            });
+            const eventTopic = await cam_obj.getEventProperties();
 
             let parseNode = function (node: any, topicPath: string) {
                 for (const child in node) {
