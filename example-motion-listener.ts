@@ -1,3 +1,7 @@
+// This script demonstrates how to listen for motion events from an ONVIF camera.
+// It uses the 'onvif/promises' library to connect to the camera and subscribe to events.
+// The script will print out any motion events that are detected by the camera.
+
 let HOSTNAME: string = '192.168.8.21',
 	PORT: number = 2020,
 	USERNAME: string = 'tpuser',
@@ -48,19 +52,23 @@ interface EventTopic {
 	topicSet: any;
 }
 
+// MotionEventListener class is responsible for listening to motion events from the camera.
 class MotionEventListener {
     private callback: (event: string) => void;
 
+    // Constructor for the MotionEventListener class.
     constructor(callback: (event: string) => void) {
         this.callback = callback;
     }
 
+    // Starts listening for events from the camera.
     public async startListening(cam: any) {
         cam.on('event', (camMessage: EventMessage, xml: any) => {
             this.handleEvent(camMessage, xml);
         });
     }
 
+    // Handles the event message received from the camera.
     private handleEvent(camMessage: EventMessage, _xml: any) {
         let eventTopic: string = camMessage.topic._
         eventTopic = stripNamespaces(eventTopic)
@@ -74,6 +82,7 @@ class MotionEventListener {
         }
     }
 
+    // Processes the data part of the event message.
     private processData(camMessage: EventMessage, eventTime: string, eventTopic: string, eventProperty: string) {
         // Check if data and simpleItem exist
         if (camMessage.message.message.data && camMessage.message.message.data.simpleItem) {
@@ -102,6 +111,7 @@ class MotionEventListener {
         }
     }
 
+    // Processes a single event and calls the callback function.
     private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
         let output: string = '';
         const now: Date = new Date();
@@ -117,6 +127,7 @@ class MotionEventListener {
 }
 
 
+// Main function to connect to the camera and start listening for events.
 async function main() {
     cam_obj = new Cam({
         hostname: HOSTNAME,
@@ -183,6 +194,7 @@ async function main() {
     }
 }
 
+// Removes namespaces from the topic string.
 function stripNamespaces(topic: string): string {
 	let output: string = '';
 	let parts: string[] = topic.split('/')
@@ -197,6 +209,7 @@ function stripNamespaces(topic: string): string {
 	return output
 }
 
+// Processes the source part of the event message.
 function processSource(camMessage: EventMessage): { sourceName: string | null, sourceValue: string | null } {
 	let sourceName: string | null = null;
 	let sourceValue: string | null = null;
