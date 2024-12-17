@@ -58,6 +58,10 @@ export class MotionEventListener {
         this.isListening = true;
         while (this.isListening) {
             try {
+                if (this.cam) {
+                    this.cam.removeAllListeners('event');
+                    this.cam = null;
+                }
                 this.cam = new Cam({
                     hostname: this.hostname,
                     username: this.username,
@@ -67,7 +71,6 @@ export class MotionEventListener {
                     preserveAddress: true
                 });
                 await this.cam.connect();
-                console.log('Motion listener connected');
                 this.cam.on('event', async (camMessage: EventMessage, xml: any) => {
                     try {
                         this.handleEvent(camMessage, xml);
@@ -81,13 +84,15 @@ export class MotionEventListener {
                         return;
                     }
                 });
-                this.startLivelinessCheck();
+                console.log('Motion listener connected');
+                await new Promise(resolve => setTimeout(resolve, this.retryDelay));
             } catch (error) {
                 console.error('Motion listener connection error:', error);
                 // Wait before retrying
                 await new Promise(resolve => setTimeout(resolve, this.retryDelay));
             }
         }
+        this.startLivelinessCheck();
     }
 
     private startLivelinessCheck() {
