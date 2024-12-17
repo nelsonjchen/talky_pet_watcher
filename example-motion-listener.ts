@@ -21,6 +21,11 @@ async function main() {
         console.log('Starting motion listener');
         await listener.startListening();
 
+        setTimeout(() => {
+            console.log('Stopping motion listener');
+            listener.stopListening();
+        }, 300000);
+
 
     } catch (error) {
         console.error(error);

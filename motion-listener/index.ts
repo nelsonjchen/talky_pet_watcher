@@ -39,6 +39,10 @@ export class MotionEventListener {
     private username: string;
     private password: string;
     private cam: any;
+    private isListening: boolean = false;
+    private retryDelay: number = 5000; // 5 seconds
+    private livelinessInterval: any;
+    private livelinessCheckInterval: number = 10000; // 10 seconds
 
     // Constructor for the MotionEventListener class. Takes a callback function that will be invoked when a motion event is detected.
     constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void) {
@@ -51,23 +55,72 @@ export class MotionEventListener {
 
     // Starts listening for events from the camera. Attaches an event listener to the camera object.
     public async startListening() {
-        this.cam = new Cam({
-            hostname: this.hostname,
-            username: this.username,
-            password: this.password,
-            port: this.port,
-            timeout: 10000,
-            preserveAddress: true
-        });
-
-        try {
-            await this.cam.connect();
-            this.cam.on('event', (camMessage: EventMessage, xml: any) => {
-                this.handleEvent(camMessage, xml);
-            });
-        } catch (error) {
-            console.error(error);
+        this.isListening = true;
+        while (this.isListening) {
+            try {
+                this.cam = new Cam({
+                    hostname: this.hostname,
+                    username: this.username,
+                    password: this.password,
+                    port: this.port,
+                    timeout: 10000,
+                    preserveAddress: true
+                });
+                await this.cam.connect();
+                console.log('Motion listener connected');
+                this.cam.on('event', async (camMessage: EventMessage, xml: any) => {
+                    try {
+                        this.handleEvent(camMessage, xml);
+                    } catch (error) {
+                        console.error('Error handling event:', error);
+                        console.log('Attempting to reconnect after event error');
+                        if (this.cam) {
+                            this.cam.removeAllListeners('event');
+                        }
+                        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                        return;
+                    }
+                });
+                this.startLivelinessCheck();
+            } catch (error) {
+                console.error('Motion listener connection error:', error);
+                // Wait before retrying
+                await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+            }
         }
+    }
+
+    private startLivelinessCheck() {
+        this.livelinessInterval = setInterval(async () => {
+            if (!this.cam) {
+                return;
+            }
+            try {
+                console.log('Performing liveliness check...');
+                await this.cam.getSystemDateAndTime();
+                console.log('Liveliness check successful.');
+            } catch (error) {
+                console.error('Liveliness check failed:', error);
+                console.log('Attempting to reconnect after liveliness check failure');
+                if (this.cam) {
+                    this.cam.removeAllListeners('event');
+                }
+                this.cam = null;
+            }
+        }, this.livelinessCheckInterval);
+    }
+
+    public stopListening() {
+        this.isListening = false;
+        if (this.cam) {
+            this.cam.removeAllListeners('event');
+            this.cam = null;
+        }
+        if (this.livelinessInterval) {
+            clearInterval(this.livelinessInterval);
+            this.livelinessInterval = null;
+        }
+        console.log('Motion listener stopped');
     }
 
     // Handles the event message received from the camera. Extracts the event topic and calls processData if it's a motion event.
