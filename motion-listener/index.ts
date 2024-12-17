@@ -1,6 +1,7 @@
 // motion-listener/index.ts
 
 import { stripNamespaces, processSource } from './utils';
+import { Cam } from 'onvif/promises';
 
 interface SimpleItem {
   $: {
@@ -30,23 +31,46 @@ interface EventMessage {
   }
 }
 
-// MotionEventListener class is responsible for listening to motion events from the camera.
+// MotionEventListener class is responsible for listening to motion events from the camera and invoking a callback with the event details.
 export class MotionEventListener {
     private callback: (event: string) => void;
+    private hostname: string;
+    private port: number;
+    private username: string;
+    private password: string;
+    private cam: any;
 
-    // Constructor for the MotionEventListener class.
-    constructor(callback: (event: string) => void) {
+    // Constructor for the MotionEventListener class. Takes a callback function that will be invoked when a motion event is detected.
+    constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void) {
         this.callback = callback;
+        this.hostname = hostname;
+        this.port = port;
+        this.username = username;
+        this.password = password;
     }
 
-    // Starts listening for events from the camera.
-    public async startListening(cam: any) {
-        cam.on('event', (camMessage: EventMessage, xml: any) => {
-            this.handleEvent(camMessage, xml);
+    // Starts listening for events from the camera. Attaches an event listener to the camera object.
+    public async startListening() {
+        this.cam = new Cam({
+            hostname: this.hostname,
+            username: this.username,
+            password: this.password,
+            port: this.port,
+            timeout: 10000,
+            preserveAddress: true
         });
+
+        try {
+            await this.cam.connect();
+            this.cam.on('event', (camMessage: EventMessage, xml: any) => {
+                this.handleEvent(camMessage, xml);
+            });
+        } catch (error) {
+            console.error(error);
+        }
     }
 
-    // Handles the event message received from the camera.
+    // Handles the event message received from the camera. Extracts the event topic and calls processData if it's a motion event.
     private handleEvent(camMessage: EventMessage, _xml: any) {
         let eventTopic: string = camMessage.topic._
         eventTopic = stripNamespaces(eventTopic)
@@ -60,7 +84,7 @@ export class MotionEventListener {
         }
     }
 
-    // Processes the data part of the event message.
+    // Processes the data part of the event message. Extracts data from simpleItem or elementItem and calls processEvent.
     private processData(camMessage: EventMessage, eventTime: string, eventTopic: string, eventProperty: string) {
         // Check if data and simpleItem exist
         if (camMessage.message.message.data && camMessage.message.message.data.simpleItem) {
@@ -89,7 +113,7 @@ export class MotionEventListener {
         }
     }
 
-    // Processes a single event and calls the callback function.
+    // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
     private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
         let output: string = '';
         const now: Date = new Date();

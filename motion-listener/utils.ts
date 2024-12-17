@@ -1,6 +1,6 @@
 // motion-listener/utils.ts
 
-// Removes namespaces from the topic string.
+// Removes namespaces from the topic string. This function splits the topic string by '/', then removes any namespace prefixes (e.g., 'ns1:') from each part, and returns the stripped topic string.
 export function stripNamespaces(topic: string): string {
   let output: string = '';
   let parts: string[] = topic.split('/')
@@ -15,7 +15,7 @@ export function stripNamespaces(topic: string): string {
   return output
 }
 
-// Processes the source part of the event message.
+// Processes the source part of the event message. Extracts the source name and value from the simpleItem within the source, if it exists.
 export function processSource(camMessage: any): { sourceName: string | null, sourceValue: string | null } {
   let sourceName: string | null = null;
   let sourceValue: string | null = null;
