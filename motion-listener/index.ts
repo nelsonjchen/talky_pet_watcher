@@ -6,7 +6,7 @@ import { Cam } from 'onvif/promises';
 interface SimpleItem {
   $: {
     Name: string;
-    Value: string;
+    Value: string | boolean;
   }
 }
 
@@ -168,12 +168,12 @@ export class MotionEventListener {
             if (Array.isArray(camMessage.message.message.data.simpleItem)) {
                 for (let x = 0; x < camMessage.message.message.data.simpleItem.length; x++) {
                     let dataName: string = camMessage.message.message.data.simpleItem[x].$.Name;
-                    let dataValue: string = camMessage.message.message.data.simpleItem[x].$.Value;
+                    let dataValue: string | boolean = camMessage.message.message.data.simpleItem[x].$.Value;
                     this.processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
                 }
             } else {
                 let dataName: string = camMessage.message.message.data.simpleItem.$.Name;
-                let dataValue: string = camMessage.message.message.data.simpleItem.$.Value;
+                let dataValue: string | boolean = camMessage.message.message.data.simpleItem.$.Value;
                 this.processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
             }
         } else if (camMessage.message.message.data && camMessage.message.message.data.elementItem) {
@@ -189,10 +189,10 @@ export class MotionEventListener {
         }
     }
 // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
-private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
+private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | boolean | null) {
     let output: string = `[${this.hostname}] `;
     const now: Date = new Date();
-    let isMotion = dataName === 'IsMotion' ? dataValue === 'true' : null;
+    let isMotion = dataName === 'IsMotion' && dataValue === true;
     if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
         this.currentMotionState = isMotion;
         output += `EVENT: ${now.toJSON()} ${eventTopic}`
