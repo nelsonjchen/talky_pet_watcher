@@ -4,31 +4,31 @@ import { stripNamespaces, processSource } from './utils';
 import { Cam } from 'onvif/promises';
 
 interface SimpleItem {
-  $: {
-    Name: string;
-    Value: string | boolean;
-  }
+    $: {
+        Name: string;
+        Value: string | boolean;
+    }
 }
 
 interface EventMessage {
-  topic: {
-    _: string;
-  };
-  message: {
+    topic: {
+        _: string;
+    };
     message: {
-      $: {
-        UtcTime: string;
-        PropertyOperation: string;
-      };
-      source?: {
-        simpleItem?: SimpleItem | SimpleItem[];
-      };
-      data?: {
-        simpleItem?: SimpleItem | SimpleItem[];
-        elementItem?: any;
-      }
+        message: {
+            $: {
+                UtcTime: string;
+                PropertyOperation: string;
+            };
+            source?: {
+                simpleItem?: SimpleItem | SimpleItem[];
+            };
+            data?: {
+                simpleItem?: SimpleItem | SimpleItem[];
+                elementItem?: any;
+            }
+        }
     }
-  }
 }
 
 // MotionEventListener class is responsible for listening to motion events from the camera and invoking a callback with the event details.
@@ -191,22 +191,60 @@ export class MotionEventListener {
             this.processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
         }
     }
-// Processes a single event and calls the callback function. Formats the event information and invokes the callback.
-private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | boolean | null) {
-    let output: string = `[${this.hostname}] `;
-    const now: Date = new Date();
-    let isMotion = dataName === 'IsMotion' && dataValue === true;
-    if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
-        this.currentMotionState = isMotion;
-        output += `EVENT: ${now.toJSON()} ${eventTopic}`
-        if (typeof (eventProperty) !== "undefined") {
-            output += ` PROP:${eventProperty}`
+    // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
+    private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | boolean | null) {
+        let output: string = `[${this.hostname}] `;
+        const now: Date = new Date();
+        let isMotion = dataName === 'IsMotion' && dataValue === true;
+        if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
+            this.currentMotionState = isMotion;
+            output += `EVENT: ${now.toJSON()} ${eventTopic}`
+            if (typeof (eventProperty) !== "undefined") {
+                output += ` PROP:${eventProperty}`
+            }
+            if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
+                output += ` DATA:${dataName}=${dataValue}`
+            }
+            this.callback(output);
         }
-        if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
-            output += ` DATA:${dataName}=${dataValue}`
-        }
-        this.callback(output);
-    }
 
+    }
 }
+
+// motion-listener/utils.ts
+
+// Removes namespaces from the topic string. This function splits the topic string by '/', then removes any namespace prefixes (e.g., 'ns1:') from each part, and returns the stripped topic string.
+function stripNamespaces(topic: string): string {
+  let output: string = '';
+  let parts: string[] = topic.split('/')
+  for (let index = 0; index < parts.length; index++) {
+    const popped = parts[index].split(':').pop()
+    let stringNoNamespace: string = popped !== undefined ? popped : ''
+    if (output.length == 0) {
+      output += stringNoNamespace
+    } else {
+      output += '/' + stringNoNamespace
+    }
+  }
+  return output
+}
+
+// Processes the source part of the event message. Extracts the source name and value from the simpleItem within the source, if it exists.
+function processSource(camMessage: any): { sourceName: string | null, sourceValue: string | null } {
+  let sourceName: string | null = null;
+  let sourceValue: string | null = null;
+
+  // Check if source and simpleItem exist
+  if (camMessage.message.message.source && camMessage.message.message.source.simpleItem) {
+    // Handle array or single item
+    if (Array.isArray(camMessage.message.message.source.simpleItem)) {
+      sourceName = camMessage.message.message.source.simpleItem[0].$.Name;
+      sourceValue = camMessage.message.message.source.simpleItem[0].$.Value;
+    } else {
+      sourceName = camMessage.message.message.source.simpleItem.$.Name;
+      sourceValue = camMessage.message.message.source.simpleItem.$.Value;
+    }
+  }
+
+  return { sourceName, sourceValue };
 }
