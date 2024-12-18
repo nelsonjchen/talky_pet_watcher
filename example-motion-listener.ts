@@ -13,7 +13,7 @@ let HOSTNAME: string = '192.168.8.21',
 
 // Main function to connect to the camera and start listening for events.
 async function main() {
-    const logger = new adze().ns('motion-listener');
+    const logger = new adze();
     try {
         logger.log('Creating MotionEventListener');
         const listener = new MotionEventListener(HOSTNAME, PORT, USERNAME, PASSWORD, (event) => {
