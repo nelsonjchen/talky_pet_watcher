@@ -44,6 +44,7 @@ export class MotionEventListener {
     private livelinessInterval: any;
     private livelinessCheckInterval: number = 10000; // 10 seconds
     private currentMotionState: boolean | null = null;
+    private reconnectDelay: number = 10000; // 10 seconds
     private logCallback: ((message: string) => void) | undefined;
     private debug: boolean;
 
@@ -86,6 +87,7 @@ export class MotionEventListener {
                             this.cam.removeAllListeners('event');
                         }
                         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                        await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
                         return;
                     }
                 });
@@ -117,6 +119,7 @@ export class MotionEventListener {
                     this.cam.removeAllListeners('event');
                 }
                 this.cam = null;
+                await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
             }
         }, this.livelinessCheckInterval);
     }
