@@ -38,17 +38,29 @@ To install and run this project, you will need to have Bun installed. You can fi
     Before running the application, you need to configure the ONVIF webcams and Telegram channel. This involves setting up the necessary credentials and connection details.
     *   **ONVIF Webcams:** You will need the IP address, username, and password for each ONVIF camera you want to monitor.
     *   **Telegram Channel:** You will need to create a Telegram bot and obtain its API token. You will also need the chat ID of the Telegram channel where you want to receive reports.
-    These configuration details should be placed in a `.env` file in the root of the project directory. Example:
+    These configuration details should be placed in a `config.ts` file in the root of the project directory. Example:
+
+    ```typescript
+    export default {
+      cameras: [
+        {
+          ip: "192.168.1.100",
+          user: "admin",
+          password: "password123",
+        },
+        {
+          ip: "192.168.1.101",
+          user: "admin",
+          password: "password456",
+        },
+      ],
+      telegram: {
+        botToken: "your_telegram_bot_token",
+        channelId: "-100123456789",
+      },
+    };
     ```
-    ONVIF_CAMERA_1_IP=192.168.1.100
-    ONVIF_CAMERA_1_USER=admin
-    ONVIF_CAMERA_1_PASSWORD=password123
-    ONVIF_CAMERA_2_IP=192.168.1.101
-    ONVIF_CAMERA_2_USER=admin
-    ONVIF_CAMERA_2_PASSWORD=password456
-    TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-    TELEGRAM_CHANNEL_ID=-100123456789
-    ```
+
 2.  **Running the Application:**
     Once you have configured the `.env` file, you can run the application using the following command:
 
