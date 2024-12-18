@@ -40,7 +40,6 @@ export class MotionEventListener {
     private retryDelay: number = 5000; // 5 seconds
     private livelinessInterval: any;
     private currentMotionState: boolean | null = null;
-    private reconnectDelay: number = 10000; // 10 seconds
     private logCallback: ((message: string) => void) | undefined;
     private debug: boolean;
 
@@ -83,7 +82,6 @@ export class MotionEventListener {
                             this.cam.removeAllListeners('event');
                         }
                         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-                        await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
                         return;
                     }
                 });
@@ -96,20 +94,26 @@ export class MotionEventListener {
                 await new Promise(resolve => setTimeout(resolve, this.retryDelay));
             }
         }
-        this.startMotionReset();
+        this.startAutoRefresh();
     }
 
-    private startMotionReset() {
+    private startAutoRefresh() {
         this.livelinessInterval = setInterval(async () => {
-            this.log('Resetting motion listener...');
-            if (this.cam) {
-                this.cam.removeAllListeners('event');
-                this.cam = null;
-            }
-            await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
-            this.startListening();
-            this.log('Motion listener reset.');
+            this.refreshMotionListener();
         }, 60000);
+    }
+
+    private async refreshMotionListener() {
+        this.log('Resetting motion listener...');
+        if (this.cam) {
+            this.cam.removeAllListeners('event');
+            this.cam = null;
+        }
+        if (this.livelinessInterval) {
+            clearInterval(this.livelinessInterval);
+        }
+        this.startListening();
+        this.log('Motion listener reset.');
     }
 
     public stopListening() {
