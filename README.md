@@ -38,33 +38,14 @@ To install and run this project, you will need to have Bun installed. You can fi
     Before running the application, you need to configure the ONVIF webcams and Telegram channel. This involves setting up the necessary credentials and connection details.
     *   **ONVIF Webcams:** You will need the IP address, username, and password for each ONVIF camera you want to monitor.
     *   **Telegram Channel:** You will need to create a Telegram bot and obtain its API token. You will also need the chat ID of the Telegram channel where you want to receive reports.
-    These configuration details should be placed in a `config.ts` file in the root of the project directory. Example:
+    These configuration details should be placed in a `config.ts` file in the root of the project directory.
 
-    ```typescript
-    export default {
-      cameras: [
-        {
-          ip: "192.168.1.100",
-          user: "admin",
-          password: "password123",
-        },
-        {
-          ip: "192.168.1.101",
-          user: "admin",
-          password: "password456",
-        },
-      ],
-      telegram: {
-        botToken: "your_telegram_bot_token",
-        channelId: "-100123456789",
-      },
-    };
-    ```
+    Please refer to `config.example.ts` for an example configuration file.
 
 2.  **Running the Application:**
-    Once you have configured the `.env` file, you can run the application using the following command:
+    Once you have configured the `config.ts` file, you can run the application using the following command:
 
     ```bash
     bun run index.ts
     ```
-    This will start the Talky Pet Watcher, which will begin monitoring the specified ONVIF cameras for motion. Upon detecting motion, it will record video, submit it to AI for summarization, and send the report to the configured Telegram channel.
+    This will start the Talky Pet Watcher, which will begin monitoring the specified ONVIF cameras for motion. Upon detecting motion, it will log the event using adze.
