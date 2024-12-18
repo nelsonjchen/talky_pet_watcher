@@ -39,7 +39,6 @@ export class MotionEventListener {
     private isListening: boolean = false;
     private retryDelay: number = 5000; // 5 seconds
     private livelinessInterval: any;
-    private livelinessCheckInterval: number = 60000; // 60 seconds
     private currentMotionState: boolean | null = null;
     private reconnectDelay: number = 10000; // 10 seconds
     private logCallback: ((message: string) => void) | undefined;
@@ -97,28 +96,20 @@ export class MotionEventListener {
                 await new Promise(resolve => setTimeout(resolve, this.retryDelay));
             }
         }
-        this.startLivelinessCheck();
+        this.startMotionReset();
     }
 
-    private startLivelinessCheck() {
+    private startMotionReset() {
         this.livelinessInterval = setInterval(async () => {
-            if (!this.cam) {
-                return;
-            }
-            try {
-                this.log('Performing liveliness check...');
-                await this.cam.getSystemDateAndTime();
-                this.log('Liveliness check successful.');
-            } catch (error) {
-                this.log('Liveliness check failed:' + error);
-                this.log('Attempting to reconnect after liveliness check failure');
-                if (this.cam) {
-                    this.cam.removeAllListeners('event');
-                }
+            this.log('Resetting motion listener...');
+            if (this.cam) {
+                this.cam.removeAllListeners('event');
                 this.cam = null;
-                await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
             }
-        }, this.livelinessCheckInterval);
+            await new Promise(resolve => setTimeout(resolve, this.reconnectDelay));
+            this.startListening();
+            this.log('Motion listener reset.');
+        }, 60000);
     }
 
     public stopListening() {
