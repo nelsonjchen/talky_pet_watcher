@@ -1,6 +1,3 @@
-// motion-listener/index.ts
-
-import { stripNamespaces, processSource } from './utils';
 import { Cam } from 'onvif/promises';
 
 interface SimpleItem {
