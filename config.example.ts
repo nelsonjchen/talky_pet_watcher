@@ -13,6 +13,9 @@ const config: Config = {
     botToken: "your_telegram_bot_token",
     channelId: "-100123456789",
   },
+  google: {
+    apiKey: "zzzzzzzz",
+  }
 };
 
 export default config;

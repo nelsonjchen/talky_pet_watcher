@@ -10,9 +10,14 @@ interface TelegramConfig {
   channelId: string;
 }
 
+interface GoogleAiConfig {
+  apiKey: string;
+}
+
 export interface Config {
   cameras: CameraConfig[];
   telegram: TelegramConfig;
+  google: GoogleAiConfig;
 }
 
 export type { Config as default};
