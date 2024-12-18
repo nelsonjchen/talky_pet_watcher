@@ -11,13 +11,15 @@ let HOSTNAME: string = '192.168.8.21',
     USERNAME: string = 'tpuser',
     PASSWORD: string = 'tppass';
 
-
 // Main function to connect to the camera and start listening for events.
 async function main() {
+    const logger = new adze().ns('motion-listener');
     try {
-        const logger = new adze().ns('motion-listener');
+        logger.log('Creating MotionEventListener');
         const listener = new MotionEventListener(HOSTNAME, PORT, USERNAME, PASSWORD, (event) => {
-            logger.log(event);
+            logger.log('Event received:', event);
+        }, (logMessage) => {
+            logger.log('MotionEventListener log:', logMessage);
         });
 
         logger.log('Starting motion listener');
@@ -28,9 +30,8 @@ async function main() {
             listener.stopListening();
         }, 300000);
 
-
     } catch (error) {
-        new adze().ns('motion-listener').error(error);
+        logger.error('Error in main:', error);
     }
 }
 

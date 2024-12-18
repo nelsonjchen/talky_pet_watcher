@@ -185,28 +185,19 @@ export class MotionEventListener {
 private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
     let output: string = '';
     const now: Date = new Date();
-    let isMotion = dataName === 'IsMotion' && dataValue === 'true';
-
-    if (this.currentMotionState === null || this.currentMotionState !== isMotion) {
-        this.currentMotionState = isMotion;
-        output += `EVENT: ${now.toJSON()} ${eventTopic}`
-        if (typeof (eventProperty) !== "undefined") {
-            output += ` PROP:${eventProperty}`
-        }
-        if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
-            output += ` DATA:${dataName}=${dataValue}`
-        }
-        this.callback(output);
-    } else if (this.currentMotionState !== null && this.currentMotionState !== isMotion) {
-        this.currentMotionState = isMotion;
-        output += `EVENT: ${now.toJSON()} ${eventTopic}`
-        if (typeof (eventProperty) !== "undefined") {
-            output += ` PROP:${eventProperty}`
-        }
-        if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
-            output += ` DATA:${dataName}=${dataValue}`
-        }
-        this.callback(output);
+    let isMotion = dataName === 'IsMotion' ? dataValue === 'true' : null;
+if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
+    this.currentMotionState = isMotion;
+    output += `EVENT: ${now.toJSON()} ${eventTopic}`
+    if (typeof (eventProperty) !== "undefined") {
+        output += ` PROP:${eventProperty}`
     }
+    if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
+        output += ` DATA:${dataName}=${dataValue}`
+    }
+    this.callback(output);
+}
+
 }
 }
+
