@@ -4,6 +4,7 @@
 // This script uses bun to run.
 
 import { MotionEventListener } from './motion-listener';
+import adze from 'adze';
 
 let HOSTNAME: string = '192.168.8.21',
     PORT: number = 2020,
@@ -14,21 +15,22 @@ let HOSTNAME: string = '192.168.8.21',
 // Main function to connect to the camera and start listening for events.
 async function main() {
     try {
+        const logger = new adze().ns('motion-listener');
         const listener = new MotionEventListener(HOSTNAME, PORT, USERNAME, PASSWORD, (event) => {
-            console.log(event);
+            logger.log(event);
         });
 
-        console.log('Starting motion listener');
+        logger.log('Starting motion listener');
         await listener.startListening();
 
         setTimeout(() => {
-            console.log('Stopping motion listener');
+            logger.log('Stopping motion listener');
             listener.stopListening();
         }, 300000);
 
 
     } catch (error) {
-        console.error(error);
+        new adze().ns('motion-listener').error(error);
     }
 }
 
