@@ -20,7 +20,7 @@ async function main() {
             logger.log('Event received:', event);
         }, (logMessage) => {
             logger.log('MotionEventListener log:', logMessage);
-        });
+        }, false);
 
         logger.log('Starting motion listener');
         await listener.startListening();

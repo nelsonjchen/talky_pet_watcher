@@ -45,15 +45,17 @@ export class MotionEventListener {
     private livelinessCheckInterval: number = 10000; // 10 seconds
     private currentMotionState: boolean | null = null;
     private logCallback: ((message: string) => void) | undefined;
+    private debug: boolean;
 
     // Constructor for the MotionEventListener class. Takes a callback function that will be invoked when a motion event is detected.
-    constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void, logCallback?: (message: string) => void) {
+    constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void, logCallback?: (message: string) => void, debug: boolean = false) {
         this.callback = callback;
         this.hostname = hostname;
         this.port = port;
         this.username = username;
         this.password = password;
         this.logCallback = logCallback;
+        this.debug = debug;
     }
 
     // Starts listening for events from the camera. Attaches an event listener to the camera object.
@@ -88,7 +90,8 @@ export class MotionEventListener {
                     }
                 });
                 this.log('Motion listener connected');
-                await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+
+                break; // Exit the loop after successful connection
             } catch (error) {
                 this.log('Motion listener connection error:' + error);
                 // Wait before retrying
@@ -132,10 +135,11 @@ export class MotionEventListener {
     }
 
     private log(message: string) {
+        const logMessage = `[${this.hostname}] ${message}`;
         if (this.logCallback) {
-            this.logCallback(message);
+            this.logCallback(logMessage);
         } else {
-            console.log(message);
+            console.log(logMessage);
         }
     }
 
@@ -156,6 +160,9 @@ export class MotionEventListener {
     // Processes the data part of the event message. Extracts data from simpleItem or elementItem and calls processEvent.
     private processData(camMessage: EventMessage, eventTime: string, eventTopic: string, eventProperty: string) {
         // Check if data and simpleItem exist
+        if (this.debug) {
+            this.log(`Motion data: ${JSON.stringify(camMessage, null, 2)}`);
+        }
         if (camMessage.message.message.data && camMessage.message.message.data.simpleItem) {
             // Handle array or single item
             if (Array.isArray(camMessage.message.message.data.simpleItem)) {
@@ -183,21 +190,20 @@ export class MotionEventListener {
     }
 // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
 private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
-    let output: string = '';
+    let output: string = `[${this.hostname}] `;
     const now: Date = new Date();
     let isMotion = dataName === 'IsMotion' ? dataValue === 'true' : null;
-if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
-    this.currentMotionState = isMotion;
-    output += `EVENT: ${now.toJSON()} ${eventTopic}`
-    if (typeof (eventProperty) !== "undefined") {
-        output += ` PROP:${eventProperty}`
+    if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
+        this.currentMotionState = isMotion;
+        output += `EVENT: ${now.toJSON()} ${eventTopic}`
+        if (typeof (eventProperty) !== "undefined") {
+            output += ` PROP:${eventProperty}`
+        }
+        if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
+            output += ` DATA:${dataName}=${dataValue}`
+        }
+        this.callback(output);
     }
-    if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
-        output += ` DATA:${dataName}=${dataValue}`
-    }
-    this.callback(output);
-}
 
 }
 }
-
