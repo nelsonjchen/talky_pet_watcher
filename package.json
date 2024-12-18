@@ -12,9 +12,7 @@
     "adze": "^2.2.0",
     "grammy": "^1.33.0",
     "nimble": "^0.0.2",
-    "onvif": "^0.8.0",
-    "rtsp-ffmpeg": "^0.0.19",
-    "socket.io": "^4.8.1"
+    "onvif": "^0.8.0"
   },
   "scripts": {
     "typecheck": "bun tsc --noEmit"
