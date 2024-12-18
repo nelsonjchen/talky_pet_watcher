@@ -39,7 +39,7 @@ export class MotionEventListener {
     private isListening: boolean = false;
     private retryDelay: number = 5000; // 5 seconds
     private livelinessInterval: any;
-    private livelinessCheckInterval: number = 10000; // 10 seconds
+    private livelinessCheckInterval: number = 60000; // 60 seconds
     private currentMotionState: boolean | null = null;
     private reconnectDelay: number = 10000; // 10 seconds
     private logCallback: ((message: string) => void) | undefined;
