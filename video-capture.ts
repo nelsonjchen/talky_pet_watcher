@@ -19,12 +19,16 @@ export class VideoCapture {
   }
 
   public async start(): Promise<void> {
-    if (this.ffmpegProcess) {
-      throw new Error("Recording already in progress");
+    // Wait until the previous recording is stopped
+    while (this.ffmpegProcess) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     this.ffmpegProcess = spawn([
       "ffmpeg",
+      "-t",
+      // Limit it to 10 seconds
+      "10",
       "-i",
       this.options.input,
       "-c:v",
