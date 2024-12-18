@@ -176,3 +176,6 @@ dist
 
 # config.ts is ignored intentionally to avoid committing sensitive or environment-specific configurations
 config.ts
+
+# All video files are ignored
+*.mp4
