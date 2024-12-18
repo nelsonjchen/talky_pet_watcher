@@ -43,6 +43,7 @@ export class MotionEventListener {
     private retryDelay: number = 5000; // 5 seconds
     private livelinessInterval: any;
     private livelinessCheckInterval: number = 10000; // 10 seconds
+    private currentMotionState: boolean | null = null;
 
     // Constructor for the MotionEventListener class. Takes a callback function that will be invoked when a motion event is detected.
     constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void) {
@@ -170,11 +171,24 @@ export class MotionEventListener {
             this.processEvent(eventTime, eventTopic, eventProperty, dataName, dataValue);
         }
     }
+// Processes a single event and calls the callback function. Formats the event information and invokes the callback.
+private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
+    let output: string = '';
+    const now: Date = new Date();
+    let isMotion = dataName === 'IsMotion' && dataValue === 'true';
 
-    // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
-    private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | null) {
-        let output: string = '';
-        const now: Date = new Date();
+    if (this.currentMotionState === null || this.currentMotionState !== isMotion) {
+        this.currentMotionState = isMotion;
+        output += `EVENT: ${now.toJSON()} ${eventTopic}`
+        if (typeof (eventProperty) !== "undefined") {
+            output += ` PROP:${eventProperty}`
+        }
+        if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
+            output += ` DATA:${dataName}=${dataValue}`
+        }
+        this.callback(output);
+    } else if (this.currentMotionState !== null && this.currentMotionState !== isMotion) {
+        this.currentMotionState = isMotion;
         output += `EVENT: ${now.toJSON()} ${eventTopic}`
         if (typeof (eventProperty) !== "undefined") {
             output += ` PROP:${eventProperty}`
@@ -184,4 +198,5 @@ export class MotionEventListener {
         }
         this.callback(output);
     }
+}
 }

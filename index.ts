@@ -1,6 +1,7 @@
 import config from "./config";
 import { Bot } from "grammy";
-import createLog  from "adze";
+import createLog from "adze";
+import { MotionEventListener } from "./motion-listener";
 
 const log = new createLog();
 
@@ -8,7 +9,6 @@ log.info("Loaded config:", config);
 
 const bot = new Bot(config.telegram.botToken);
 
-// TODO: Implement Telegram reporting
 async function reportToTelegram(message: string) {
   log.info("Sending to telegram:", message);
   try {
@@ -25,6 +25,15 @@ async function main() {
   config.cameras.forEach(async (camera, index) => {
     log.info(`Camera ${index + 1}:`, camera);
     await reportToTelegram(`Camera ${index + 1} online: ${camera.ip}`);
+
+    const motionListener = new MotionEventListener(
+      camera.ip,
+      camera.port,
+      camera.user,
+      camera.password,
+      (event) => reportToTelegram(`Camera ${index + 1}: ${event}`)
+    );
+    motionListener.startListening().catch(log.error);
   });
 }
 
