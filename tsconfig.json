@@ -15,11 +15,11 @@
     "noEmit": true,
 
     // Best practices
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
 
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,

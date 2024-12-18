@@ -5,7 +5,8 @@ export function stripNamespaces(topic: string): string {
   let output: string = '';
   let parts: string[] = topic.split('/')
   for (let index = 0; index < parts.length; index++) {
-    let stringNoNamespace: string = parts[index].split(':').pop()
+    const popped = parts[index].split(':').pop()
+    let stringNoNamespace: string = popped !== undefined ? popped : ''
     if (output.length == 0) {
       output += stringNoNamespace
     } else {
