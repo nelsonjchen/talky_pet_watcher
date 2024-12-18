@@ -1,22 +1,28 @@
 import config from "./config";
-import type { Config } from "./types";
+import { Bot } from "grammy";
 
 console.log("Loaded config:", config);
 
+const bot = new Bot(config.telegram.botToken);
+
 // TODO: Implement Telegram reporting
-function reportToTelegram(message: string) {
+async function reportToTelegram(message: string) {
   console.log("Sending to telegram:", message);
-  // Placeholder for telegram implementation
+  try {
+    await bot.api.sendMessage(config.telegram.channelId, message);
+  } catch (error) {
+    console.error("Error sending telegram message:", error);
+  }
 }
 
-function main() {
+async function main() {
   console.log("Starting Talky Pet Watcher");
-  reportToTelegram("Talky Pet Watcher started");
+  await reportToTelegram("Talky Pet Watcher started");
 
-  config.cameras.forEach((camera, index) => {
+  config.cameras.forEach(async (camera, index) => {
     console.log(`Camera ${index + 1}:`, camera);
-    reportToTelegram(`Camera ${index + 1} online: ${camera.ip}`);
+    await reportToTelegram(`Camera ${index + 1} online: ${camera.ip}`);
   });
 }
 
-main();
+main().catch(console.error);
