@@ -1,28 +1,22 @@
-import { Cam } from 'onvif/promises';
+import config from "./config";
+import type { Config } from "./types";
 
-const username = process.env.USERNAME;
-const password = process.env.PASSWORD;
-const cameraHost = process.env.CAMERA_HOST;
+console.log("Loaded config:", config);
 
-const cam = new Cam({username: username, password: password, hostname: cameraHost, port: 2020});
+// TODO: Implement Telegram reporting
+function reportToTelegram(message: string) {
+  console.log("Sending to telegram:", message);
+  // Placeholder for telegram implementation
+}
 
-let previousIsMotion: boolean | null = null;
+function main() {
+  console.log("Starting Talky Pet Watcher");
+  reportToTelegram("Talky Pet Watcher started");
 
-(async () => {
-  await cam.connect();
-  console.log('Connected to camera');
-  cam.on('event', (event: any) => {
-    console.log('Event:', event);
-    if (event.message && event.message.data && event.message.data.simpleItem) {
-      const isMotionItem = Array.isArray(event.message.data.simpleItem) ? event.message.data.simpleItem.find((item: any) => item.$.Name === 'IsMotion') : event.message.data.simpleItem;
-      if (isMotionItem) {
-        const currentIsMotion = isMotionItem.$.Value === 'true';
-        if (previousIsMotion !== null && previousIsMotion !== currentIsMotion) {
-          console.log('IsMotion changed to:', currentIsMotion);
-        }
-        previousIsMotion = currentIsMotion;
-      }
-    }
+  config.cameras.forEach((camera, index) => {
+    console.log(`Camera ${index + 1}:`, camera);
+    reportToTelegram(`Camera ${index + 1} online: ${camera.ip}`);
   });
-})().catch(console.error);
+}
 
+main();
