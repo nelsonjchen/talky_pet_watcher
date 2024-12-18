@@ -42,6 +42,11 @@ export class VideoCapture {
     }
 
     this.ffmpegProcess.kill();
+    // Wait until the process is actually killed
+    // Check if the process is killed every 100ms
+    while (!this.ffmpegProcess.killed) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     this.ffmpegProcess = null;
   }
 }
