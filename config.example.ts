@@ -4,7 +4,7 @@ const config: Config = {
   cameras: [
     {
       ip: "192.168.8.21",
-      user: "admin",
+      username: "admin",
       password: "password123",
       port: 2020
     },

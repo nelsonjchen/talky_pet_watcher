@@ -29,9 +29,10 @@ async function main() {
     const motionListener = new MotionEventListener(
       camera.ip,
       camera.port,
-      camera.user,
+      camera.username,
       camera.password,
-      (event) => reportToTelegram(`Camera ${index + 1}: ${event}`)
+      (event) => reportToTelegram(`Camera ${index + 1}: ${event}`),
+      (message) => log.info(`Motion Listener ${index + 1}:`, message)
     );
     motionListener.startListening().catch(log.error);
   });

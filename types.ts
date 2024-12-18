@@ -1,6 +1,6 @@
 interface CameraConfig {
   ip: string;
-  user: string;
+  username: string;
   password: string;
   port: number;
 }
