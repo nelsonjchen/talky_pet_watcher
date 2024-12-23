@@ -8,6 +8,7 @@ interface Clip {
   filename: string;
   hostname: string;
   timestamp: string;
+  estimatedDuration: number;
 }
 
 export function createCameraClipObservable(
@@ -64,13 +65,18 @@ export function createCameraClipObservable(
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
+          const finishedRecordingTimestamp = new Date()
+
           if (fileExists) {
             subscriber.next({
               filename: `${hostname}-${currentRecordingTimestamp}.mp4`,
               hostname: hostname,
               timestamp: currentRecordingTimestamp,
+              estimatedDuration: finishedRecordingTimestamp.getTime() - new Date(currentRecordingTimestamp).getTime(),
             });
             currentRecordingTimestamp = null;
+          } else {
+            // Don't log the error at all. Silently ignore it.
           }
         }
         if (videoCapture) {
