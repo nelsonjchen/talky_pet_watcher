@@ -42,7 +42,7 @@ export class VideoCapture {
 
   public async stop(): Promise<void> {
     if (!this.ffmpegProcess) {
-      throw new Error("No recording in progress");
+      return;
     }
 
     this.ffmpegProcess.kill();
