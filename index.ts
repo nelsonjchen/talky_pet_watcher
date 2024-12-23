@@ -100,9 +100,9 @@ async function main() {
         relevantClips: {
           type: SchemaType.ARRAY,
           items: {
-            type: SchemaType.NUMBER,
+            type: SchemaType.INTEGER,
           },
-          description: "Indices of relevant clips",
+          description: "Integer indices of relevant clips",
           nullable: false,
         },
         caption: {
@@ -165,7 +165,13 @@ async function main() {
     // Only pick out the relevant clips. Look them up from the clips array.
     let relevantClips: Clip[] = [];
     try {
-      relevantClips = responseJson.relevantClips.map((index) => clips[index]);
+      // It may be possible that the relevantClips array contains indices that are out of bounds.
+      // Filter out any indices that are out of bounds.
+      relevantClips = responseJson.relevantClips.map(
+        (index) => clips[index]
+      ).filter(
+        (clip) => clip !== undefined
+      );
     } catch (error) {
       log.error("Error getting relevant clips:", error);
       return;
