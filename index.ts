@@ -1,9 +1,9 @@
 import config from "./config";
-import { Bot, InputFile, InputMediaBuilder } from "grammy";
+import { Bot, InputMediaBuilder } from "grammy";
 import createLog from "adze";
 import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, SchemaType, type GenerateContentRequest, type Part } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType, type GenerateContentRequest, type Part } from "@google/generative-ai";
 import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
 import { type Clip, createCameraClipObservable } from './camera-clip';
 import { filter, bufferTime } from 'rxjs/operators';
