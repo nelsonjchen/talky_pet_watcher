@@ -4,7 +4,7 @@ import { VideoCapture } from "./video-capture";
 import type { MotionOutput } from "./types";
 import { existsSync } from "node:fs";
 
-interface Clip {
+export interface Clip {
   filename: string;
   hostname: string;
   timestamp: string;
