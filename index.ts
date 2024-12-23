@@ -16,15 +16,6 @@ const fileManager = new GoogleAIFileManager(config.google.apiKey);
 
 const bot = new Bot(config.telegram.botToken);
 
-async function reportToTelegram(message: string) {
-  log.info("Sending to telegram:", message);
-  try {
-    await bot.api.sendMessage(config.telegram.channelId, message);
-  } catch (error) {
-    log.error("Error sending telegram message:", error);
-  }
-}
-
 async function main() {
   log.info("Starting Talky Pet Watcher");
 
