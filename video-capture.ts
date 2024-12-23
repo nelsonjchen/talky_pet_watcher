@@ -34,8 +34,8 @@ export class VideoCapture {
     this.ffmpegProcess = spawn([
       "ffmpeg",
       "-t",
-      // Limit it to 10 seconds
-      "10",
+      // Limit it to 20 seconds
+      "20",
       "-i",
       this.options.input,
       "-c:v",
