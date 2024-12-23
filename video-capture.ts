@@ -33,6 +33,7 @@ export class VideoCapture {
 
     this.ffmpegProcess = spawn([
       "ffmpeg",
+      "-y",
       "-t",
       // Limit it to 20 seconds
       "20",
@@ -40,45 +41,23 @@ export class VideoCapture {
       this.options.input,
       "-c:v",
       "copy",
-      "-c:a",
-      "aac",
+      "-f",
+      "mp4",
       this.options.output,
-      "-y",
     ], {
       stdout: "pipe",
       stderr: "pipe",
     });
 
     if (this.options.logger) {
-      if (this.ffmpegProcess.stdout && !(typeof this.ffmpegProcess.stdout === 'number')) {
-        const reader = this.ffmpegProcess.stdout.getReader();
-        const decoder = new TextDecoder();
-        const read = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            this.options.logger.log(decoder.decode(value));
-          }
-        };
-        read();
-        this.ffmpegProcess.exited.then(() => {
-          reader.releaseLock();
-        });
-      }
       if (this.ffmpegProcess.stderr && !(typeof this.ffmpegProcess.stderr === 'number')) {
-        const reader = this.ffmpegProcess.stderr.getReader();
-        const decoder = new TextDecoder();
+        const stderr = this.ffmpegProcess.stderr;
         const read = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            this.options.logger.log(decoder.decode(value));
+          for await (const chunk of stderr) {
+            console.log(new TextDecoder().decode(chunk));
           }
         };
         read();
-        this.ffmpegProcess.exited.then(() => {
-          reader.releaseLock();
-        });
       }
     }
   }

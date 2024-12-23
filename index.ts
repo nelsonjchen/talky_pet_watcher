@@ -41,7 +41,13 @@ async function main() {
   // Merge all camera observables into a single observable with merge
   const mergedCameraObservable = merge(...cameraObservables);
   // Filter out clips that are less than 7 seconds
-  const filteredMergedCameraObservable = mergedCameraObservable.pipe(filter((clip: Clip) => clip.estimatedDuration > 7));
+  const filteredMergedCameraObservable = mergedCameraObservable.pipe(filter((clip: Clip) => {
+    const isClipValid = clip.estimatedDuration > 4;
+    if (!isClipValid) {
+      log.info(`Filtered out clip with duration ${clip.estimatedDuration} seconds`);
+    }
+    return isClipValid;
+  }));
   // Buffer the clips for 30 seconds so we can process them in batches
   const bufferedMerrgedCameraObservable = filteredMergedCameraObservable.pipe(bufferTime(30000));
 

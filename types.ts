@@ -29,4 +29,8 @@ export interface Config {
   google: GoogleAiConfig;
 }
 
+interface ReadableStream<R = any> {
+  [Symbol.asyncIterator](): AsyncIterableIterator<R>;
+}
+
 export type { Config as default};
