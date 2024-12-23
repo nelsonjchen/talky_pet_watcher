@@ -65,14 +65,31 @@ export function createCameraClipObservable(
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
 
-          const finishedRecordingTimestamp = new Date()
+          let duration = 0.0;
+          // Run ffprobe to get the duration of the video
+          try {
+            const probe = Bun.spawnSync(
+              [
+                'ffprobe',
+                '-v',
+                'error',
+                '-show_entries',
+                'format=duration',
+                '-of',
+                'default=noprint_wrappers=1:nokey=1',
+                filename]
+            );
+            duration = parseFloat(probe.stdout.toString());
+          } catch (error) {
+            // Don't log the error at all. Silently ignore it.
+          }
 
           if (fileExists) {
             subscriber.next({
               filename: `${hostname}-${currentRecordingTimestamp}.mp4`,
               hostname: hostname,
               timestamp: currentRecordingTimestamp,
-              estimatedDuration: finishedRecordingTimestamp.getTime() - new Date(currentRecordingTimestamp).getTime(),
+              estimatedDuration: duration,
             });
             currentRecordingTimestamp = null;
           } else {

@@ -4,17 +4,17 @@ import { type Subprocess } from "bun";
 interface Options {
   input: string;
   output: string;
-  logger?: any;
+  logger?: (message: string) => void;
 }
 
 export class VideoCapture {
-  private ffmpegProcess: Subprocess | null = null;
+  private ffmpegProcess: Subprocess<"ignore", "pipe", "pipe"> | null = null;
   private options: Options;
 
   constructor(options: Options) {
     this.options = options;
     if (this.options.logger) {
-      this.options.logger.log("VideoCapture initialized with options:", options);
+      this.options.logger("VideoCapture initialized with options:");
     }
   }
 
@@ -24,14 +24,14 @@ export class VideoCapture {
 
   public async start(): Promise<void> {
     if (this.options.logger) {
-      this.options.logger.log("Starting video capture...");
+      this.options.logger("Starting video capture...");
     }
     // Wait until the previous recording is stopped
     while (this.ffmpegProcess) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    this.ffmpegProcess = spawn([
+    const ffmpegProcess = spawn([
       "ffmpeg",
       "-y",
       "-t",
@@ -50,21 +50,22 @@ export class VideoCapture {
     });
 
     if (this.options.logger) {
-      if (this.ffmpegProcess.stderr && !(typeof this.ffmpegProcess.stderr === 'number')) {
-        const stderr = this.ffmpegProcess.stderr;
-        const read = async () => {
-          for await (const chunk of stderr) {
-            console.log(new TextDecoder().decode(chunk));
-          }
-        };
-        read();
-      }
+      const logger = this.options.logger;
+      const read = async () => {
+        for await (const chunk of ffmpegProcess.stderr) {
+          const text = new TextDecoder().decode(chunk)
+          logger(text);
+        }
+      };
+      read();
     }
+    this.ffmpegProcess = ffmpegProcess;
+
   }
 
   public async stop(): Promise<void> {
     if (this.options.logger) {
-      this.options.logger.log("Stopping video capture...");
+      this.options.logger("Stopping video capture...");
     }
     if (!this.ffmpegProcess) {
       return;
@@ -78,7 +79,7 @@ export class VideoCapture {
     }
     this.ffmpegProcess = null;
     if (this.options.logger) {
-      this.options.logger.log("Video capture stopped.");
+      this.options.logger("Video capture stopped.");
     }
   }
 }
