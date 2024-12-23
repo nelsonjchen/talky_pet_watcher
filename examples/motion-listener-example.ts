@@ -3,7 +3,8 @@
 // The script will print out any motion events that are detected by the camera.
 // This script uses bun to run.
 
-import { MotionEventListener } from './motion-listener';
+import { MotionEventListener } from '../motion-listener';
+import type { MotionOutput } from '../types';
 import adze from 'adze';
 
 let HOSTNAME: string = '192.168.8.21',
@@ -16,9 +17,9 @@ async function main() {
     const logger = new adze();
     try {
         logger.log('Creating MotionEventListener');
-        const listener = new MotionEventListener(HOSTNAME, PORT, USERNAME, PASSWORD, (event) => {
+        const listener = new MotionEventListener(HOSTNAME, PORT, USERNAME, PASSWORD, (event: MotionOutput) => {
             logger.log('Event received:', event);
-        }, (logMessage) => {
+        }, (logMessage: string) => {
             logger.log('MotionEventListener log:', logMessage);
         }, false);
 

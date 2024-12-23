@@ -1,4 +1,6 @@
 import { Cam } from 'onvif/promises';
+// MotionEventListener class is responsible for listening to motion events from the camera and invoking a callback with the event details.
+import type { MotionOutput } from './types';
 
 interface SimpleItem {
     $: {
@@ -28,9 +30,9 @@ interface EventMessage {
     }
 }
 
-// MotionEventListener class is responsible for listening to motion events from the camera and invoking a callback with the event details.
+
 export class MotionEventListener {
-    private callback: (event: string) => void;
+    private callback: (event: MotionOutput) => void;
     private hostname: string;
     private port: number;
     private username: string;
@@ -44,7 +46,7 @@ export class MotionEventListener {
     private debug: boolean;
 
     // Constructor for the MotionEventListener class. Takes a callback function that will be invoked when a motion event is detected.
-    constructor(hostname: string, port: number, username: string, password: string, callback: (event: string) => void, logCallback?: (message: string) => void, debug: boolean = false) {
+    constructor(hostname: string, port: number, username: string, password: string, callback: (event: MotionOutput) => void, logCallback?: (message: string) => void, debug: boolean = false) {
         this.callback = callback;
         this.hostname = hostname;
         this.port = port;
@@ -185,21 +187,20 @@ export class MotionEventListener {
     }
     // Processes a single event and calls the callback function. Formats the event information and invokes the callback.
     private processEvent(eventTime: string, eventTopic: string, eventProperty: string, dataName: string | null, dataValue: string | boolean | null) {
-        let output: string = `[${this.hostname}] `;
         const now: Date = new Date();
         let isMotion = dataName === 'IsMotion' && dataValue === true;
         if (dataName === 'IsMotion' && this.currentMotionState !== isMotion) {
             this.currentMotionState = isMotion;
-            output += `EVENT: ${now.toJSON()} ${eventTopic}`
-            if (typeof (eventProperty) !== "undefined") {
-                output += ` PROP:${eventProperty}`
-            }
-            if (typeof (dataName) !== "undefined" && typeof (dataValue) !== "undefined") {
-                output += ` DATA:${dataName}=${dataValue}`
-            }
+            const output: MotionOutput = {
+                hostname: this.hostname,
+                timestamp: now.toJSON(),
+                eventTopic: eventTopic,
+                eventProperty: eventProperty,
+                dataName: dataName,
+                dataValue: dataValue,
+            };
             this.callback(output);
         }
-
     }
 }
 

@@ -1,4 +1,4 @@
-import { VideoCapture } from "./video-capture";
+import { VideoCapture } from "../video-capture";
 
 const rtspStream = process.env.RTSP_STREAM || "rtsp://tpuser:tppass@192.168.8.21/stream1";
 const outputFile = process.env.OUTPUT_FILE || "output.mp4";
