@@ -28,7 +28,6 @@ async function reportToTelegram(message: string) {
 
 async function main() {
   log.info("Starting Talky Pet Watcher");
-  await reportToTelegram("Talky Pet Watcher started");
 
   const tmpDir = path.join(process.cwd(), 'tmp');
   if (!existsSync(tmpDir)) {
@@ -37,7 +36,6 @@ async function main() {
 
   config.cameras.forEach(async (camera, index) => {
     log.info(`Camera ${index + 1}:`, camera);
-    await reportToTelegram(`Camera ${index + 1} online: ${camera.ip}`);
 
     const outputVideoPath = path.join(tmpDir, `camera-${index + 1}-${Date.now()}.mp4`);
     const videoCapture = new VideoCapture({
