@@ -129,7 +129,7 @@ async function main() {
     });
 
     modelInput.push(
-      { text: "Identify relevant clips and generate a caption." },
+      { text: "Identify relevant clips and generate a caption less than 100 words. Be sure to use a lot of emojis!" },
     );
 
     const result = await model.generateContent(
