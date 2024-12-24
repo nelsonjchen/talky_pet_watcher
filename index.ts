@@ -136,6 +136,8 @@ JSON output with the relevant clip(s) and the caption.
 
 The relevant clip(s) should be an array of indices of the clips you want to include in the final video.
 
+The indices should be integers and should be within the bounds of the clips array and start from 0.
+
 The caption should be a string and if there are no relevant clips, it should be an empty string.
 
 The array can be empty if there are no relevant clips.`,
