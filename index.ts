@@ -207,7 +207,7 @@ The array can be empty if there are no relevant clips.`,
       // For the first clip, send as a video message with the caption
       if (index === 0) {
         return InputMediaBuilder.video(outputVideoInputFile, {
-          caption: caption,
+          caption: `🤖: ${caption}`,
         });
       }
       return InputMediaBuilder.video(outputVideoInputFile);
