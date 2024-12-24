@@ -1,7 +1,7 @@
 import config from "./config";
 import { Bot, InputFile, InputMediaBuilder } from "grammy";
 import createLog from "adze";
-import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { GoogleGenerativeAI, SchemaType, type GenerateContentRequest, type Part } from "@google/generative-ai";
 import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
@@ -207,6 +207,16 @@ async function main() {
       clips.forEach((clip) => {
         const outputVideoPath = path.join(tmpDir, clip.filename);
         unlinkSync(outputVideoPath);
+      });
+      // Also clean up mp4s in the tmp directory that are older than 1 hour
+      const files = readdirSync(tmpDir);
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      files.forEach((file) => {
+        const filePath = path.join(tmpDir, file);
+        const stats = statSync(filePath);
+        if (stats.isFile() && stats.mtime < oneHourAgo) {
+          unlinkSync(filePath);
+        }
       });
     } catch (error) {
       log.error("Error cleaning up files:", error);
