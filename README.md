@@ -1,4 +1,4 @@
-# 🐶 Talky Pet Watcher
+# 🐾📹 Talky Pet Watcher
 
 _We burn a lot of money on pets. We can spend some more on AI to watch them!_
 
