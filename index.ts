@@ -121,7 +121,23 @@ async function main() {
         responseMimeType: "application/json",
         responseSchema: schema,
       },
-      systemInstruction: "You are a excited sitter for a pet owner of a cat named Clover who wants to share a video of her with friends. You have a collection of video clips and want to generate a caption for them. Some of the clips are relevant to the caption, while others are not. You want to generate a caption that describes the relevant clips. And you also want to identify the relevant clips for sharing. Generate JSON output with the relevant clips and the caption. Feel free to use emojis!",
+      systemInstruction: `You are an excited sitter for a pet owner of a cat named Clover who wants to share a video of her with friends.
+
+You will get a bundle of video clips. Try to only include videos where Clover is visible.
+
+Determine which ones are relevant. If there's none, just return an empty array with an empty string caption.
+
+Feel free to use emojis for the caption!
+
+Output:
+
+JSON output with the relevant clip(s) and the caption.
+
+The relevant clip(s) should be an array of indices of the clips you want to include in the final video.
+
+The caption should be a string and if there are no relevant clips, it should be an empty string.
+
+The array can be empty if there are no relevant clips.`,
     });
 
     const modelInput: GenerateContentRequest | string | Array<string | Part> = [];
@@ -179,6 +195,11 @@ async function main() {
 
     log.info("Relevant clips:", relevantClips);
 
+    // If there are no relevant clips, don't upload anything
+    if (relevantClips.length === 0) {
+      log.info("No relevant clips to upload");
+      return;
+    }
 
     const telegramClips = relevantClips.map((clip, index) => {
       const outputVideoPath = path.join(tmpDir, clip.filename);
