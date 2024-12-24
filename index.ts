@@ -1,5 +1,5 @@
 import config from "./config";
-import { Bot, InputMediaBuilder } from "grammy";
+import { Bot, InputFile, InputMediaBuilder } from "grammy";
 import createLog from "adze";
 import { existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
@@ -182,13 +182,14 @@ async function main() {
 
     const telegramClips = relevantClips.map((clip, index) => {
       const outputVideoPath = path.join(tmpDir, clip.filename);
+      const outputVideoInputFile = new InputFile(outputVideoPath);
       // For the first clip, send as a video message with the caption
       if (index === 0) {
-        return InputMediaBuilder.video(outputVideoPath, {
+        return InputMediaBuilder.video(outputVideoInputFile, {
           caption: caption,
         });
       }
-      return InputMediaBuilder.video(outputVideoPath);
+      return InputMediaBuilder.video(outputVideoInputFile);
     });
 
     try {
