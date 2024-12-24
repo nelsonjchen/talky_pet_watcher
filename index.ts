@@ -204,11 +204,7 @@ async function main() {
 
     // Clean up the files
     try {
-      clips.forEach((clip) => {
-        const outputVideoPath = path.join(tmpDir, clip.filename);
-        unlinkSync(outputVideoPath);
-      });
-      // Also clean up mp4s in the tmp directory that are older than 1 hour
+      // Clean up mp4s in the tmp directory that are older than 1 hour
       const files = readdirSync(tmpDir);
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
       files.forEach((file) => {
