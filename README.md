@@ -1,8 +1,8 @@
 # 🐾📹 Talky Pet Watcher
 
-_We burn a lot of money on pets. We can spend some more on AI to watch them!_
+_Pets, Play, Poop, Post!_
 
-STATUS: Hardcoded to 1 catte.
+STATUS: 🚧🚧🚧🚧 Hardcoded to 1 catte. So many bugs. So many corner cases.
 
 ## Project Statement
 
