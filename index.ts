@@ -50,7 +50,7 @@ async function main() {
     return isClipValid;
   }));
   // Buffer the clips for 30 seconds so we can process them in batches
-  const bufferedMerrgedCameraObservable = filteredMergedCameraObservable.pipe(bufferTime(30000));
+  const bufferedMerrgedCameraObservable = filteredMergedCameraObservable.pipe(bufferTime(60000));
 
 
   bufferedMerrgedCameraObservable.subscribe(async (clips) => {
