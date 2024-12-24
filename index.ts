@@ -226,7 +226,7 @@ The array can be empty if there are no relevant clips.`,
     // Clean up the files
     try {
       // Clean up mp4s in the tmp directory that are older than 1 hour
-      const files = readdirSync(tmpDir);
+      const files = readdirSync(tmpDir).filter((file) => file.endsWith(".mp4") && file !== ".gitignore");
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
       files.forEach((file) => {
         const filePath = path.join(tmpDir, file);
