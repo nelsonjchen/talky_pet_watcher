@@ -114,9 +114,11 @@ graph TD
     J -- File Ready --> K{Generate Content with Gemini};
     K --> L{Parse JSON Response};
     L --> M{Extract Caption and Relevant Clips};
-    M --> N{Send Media Group to Telegram};
-    N --> O{Clean Up Old Files};
-    O --> H;
+    M --> N{Relevant Clips?};
+    N -- Yes --> O{Send Media Group to Telegram};
+    N -- No --> P{Clean Up Old Files};
+    O --> P;
+    P --> H;
 ```
 
 ## Typechecking
