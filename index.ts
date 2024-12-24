@@ -65,7 +65,7 @@ async function main() {
     const googleVideoClips = (await Promise.all(
       clips.map(async (clip, index) => {
         const outputVideoPath = path.join(tmpDir, clip.filename);
-        log.info(`Uploading {clip.filename} to Google AI`);
+        log.info(`Uploading ${clip} to Google AI`);
         const uploadResponse = await fileManager.uploadFile(
           outputVideoPath, {
           mimeType: "video/mp4",
