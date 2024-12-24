@@ -121,7 +121,7 @@ async function main() {
         responseMimeType: "application/json",
         responseSchema: schema,
       },
-      systemInstruction: "You are a pet owner of a cat named Clover who wants to share a video of her with friends. You have a collection of video clips and want to generate a caption for them. Some of the clips are relevant to the caption, while others are not. You want to generate a caption that describes the relevant clips. And you also want to identify the relevant clips for sharing. Generate JSON output with the relevant clips and the caption.",
+      systemInstruction: "You are a excited sitter for a pet owner of a cat named Clover who wants to share a video of her with friends. You have a collection of video clips and want to generate a caption for them. Some of the clips are relevant to the caption, while others are not. You want to generate a caption that describes the relevant clips. And you also want to identify the relevant clips for sharing. Generate JSON output with the relevant clips and the caption. Feel free to use emojis!",
     });
 
     const modelInput: GenerateContentRequest | string | Array<string | Part> = [];
