@@ -8,6 +8,7 @@ import { FileState, GoogleAIFileManager } from "@google/generative-ai/server";
 import { type Clip, createCameraClipObservable } from './camera-clip';
 import { filter, bufferTime } from 'rxjs/operators';
 import { merge } from "rxjs";
+import pRetry from "p-retry";
 
 const log = new createLog();
 
@@ -66,20 +67,20 @@ async function main() {
       clips.map(async (clip, index) => {
         const outputVideoPath = path.join(tmpDir, clip.filename);
         log.info(`Uploading ${clip} to Google AI`);
-        const uploadResponse = await fileManager.uploadFile(
+        const uploadResponse = await pRetry(async () => fileManager.uploadFile(
           outputVideoPath, {
           mimeType: "video/mp4",
           displayName: `video-${index}.mp4`,
-        });
+        }), { retries: 5 });
         log.info(`Uploaded ${clip.filename} to Google AI`);
         const name = uploadResponse.file.name;
 
         // Poll getFile() on a set interval (10 seconds here) to check file state.
-        let file = await fileManager.getFile(name);
+        let file = await pRetry(async () => fileManager.getFile(name), { retries: 5 });
         while (file.state === FileState.PROCESSING) {
           await new Promise((resolve) => setTimeout(resolve, 100));
           // Fetch the file from the API again
-          file = await fileManager.getFile(name);
+          file = await pRetry(async () => fileManager.getFile(name), { retries: 5 });
         }
 
         if (file.state === FileState.FAILED) {
@@ -154,9 +155,9 @@ The array can be empty if there are no relevant clips.`,
       { text: "Identify relevant clips and generate a caption less than 100 words. Be sure to use a lot of emojis!" },
     );
 
-    const result = await model.generateContent(
+    const result = await pRetry(async () => model.generateContent(
       modelInput
-    );
+    ), { retries: 5 });
 
     // Handle the response of generated text
     const responseText = result.response.text();
