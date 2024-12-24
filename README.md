@@ -2,7 +2,7 @@
 
 _Pets, Play, Poop, Post!_
 
-STATUS: 🚧🚧🚧🚧 Hardcoded to 1 catte. So many bugs. So many corner cases.
+STATUS: 🚧🚧🚧🚧 Hardcoded to 1 catte. So many bugs. So many corner cases. Expecting an architectural rewrite.
 
 ## Project Statement
 
