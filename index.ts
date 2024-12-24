@@ -106,13 +106,21 @@ async function main() {
           description: "Integer indices of relevant clips",
           nullable: false,
         },
+        irrelevantClips: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.INTEGER,
+          },
+          description: "Integer indices of irrelevant clips",
+          nullable: false,
+        },
         caption: {
           type: SchemaType.STRING,
           description: "Caption for the relevant clips",
           nullable: false,
         },
       },
-      required: ["relevantClips", "caption"],
+      required: ["relevantClips", "caption", "irrelevantClips"],
     };
 
     // Choose a Gemini model.
@@ -167,6 +175,7 @@ The array can be empty if there are no relevant clips.`,
     // Try to parse the response as JSON
     let responseJson: {
       relevantClips: number[];
+      irrelevantClips: number[];
       caption: string;
     };
     try {
